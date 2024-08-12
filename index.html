@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+
+<head>
+      <meta charset="UTF-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <title>حساب النسبة المئوية</title>
+      <style>
+            /* باقي التنسيقات كما هي */
+
+            body {
+                  font-family: Arial, sans-serif;
+                  background-color: #f9f9f9;
+                  color: #333;
+                  margin: 0;
+                  padding: 20px;
+                  display: flex;
+                  flex-direction: column;
+                  justify-content: center;
+                  align-items: center;
+                  min-height: 100vh;
+                  text-align: right;
+            }
+
+            h1 {
+                  color: #444;
+                  margin-bottom: 20px;
+                  font-size: 24px;
+                  text-align: center;
+            }
+
+            label {
+                  font-weight: bold;
+                  margin-top: 10px;
+                  color: #555;
+            }
+
+            input[type="number"],
+            input[type="text"],
+            textarea {
+                  padding: 10px;
+                  margin: 10px 0;
+                  border: 1px solid #ccc;
+                  border-radius: 5px;
+                  background-color: #f0f0f0;
+                  width: 100%;
+                  box-sizing: border-box;
+                  font-size: 16px;
+            }
+
+            textarea,
+            #result {
+                  height: 100px;
+                  resize: none;
+            }
+
+            .container {
+                  display: flex;
+                  justify-content: space-between;
+                  width: 100%;
+                  max-width: 1200px;
+                  gap: 20px;
+                  flex-wrap: wrap;
+            }
+
+            .column {
+                  display: flex;
+                  flex-direction: column;
+                  flex: 1;
+                  min-width: 280px;
+                  margin-bottom: 20px;
+            }
+
+            #increase {
+                  color: #555;
+                  font-weight: bold;
+                  margin-top: 20px;
+            }
+
+            footer {
+                  margin-top: 20px;
+                  padding: 10px;
+                  background-color: #333;
+                  color: #fff;
+                  font-size: 12px;
+                  width: 100%;
+                  text-align: center;
+            }
+
+            footer a {
+                  color: #fff;
+                  text-decoration: none;
+            }
+
+            footer a:hover {
+                  text-decoration: underline;
+            }
+
+            button {
+                  background-color: #007bff;
+                  color: #fff;
+                  border: none;
+                  border-radius: 5px;
+                  padding: 10px;
+                  margin: 10px 0;
+                  cursor: pointer;
+                  font-size: 16px;
+                  width: 100%;
+                  box-sizing: border-box;
+            }
+
+            button:hover {
+                  background-color: #0056b3;
+            }
+
+            #visitorCounter {
+                  margin-top: 20px;
+                  padding: 10px;
+                  font-size: 15px;
+                  /* تم تقليل الحجم بمقدار 3 نقاط */
+                  color: #333;
+                  background-color: #e9ecef;
+                  border-radius: 5px;
+                  text-align: center;
+                  width: 100%;
+                  max-width: 200px;
+            }
+
+            @media (max-width: 600px) {
+                  h1 {
+                        font-size: 20px;
+                  }
+
+                  input[type="number"],
+                  input[type="text"],
+                  textarea,
+                  button {
+                        font-size: 14px;
+                  }
+            }
+      </style>
+</head>
+
+<body>
+      <h1>حاسبة النسبة المئوية والتغيير</h1>
+      <p>من خلال هذه الحاسبة يمكنك معرفة نسبة الزيادة أو التناقص لأي مبلغ من خلال الجزء الأيمن من الحاسبة. وبالنسبة
+            للجزء الأيسر، فيمكنك من خلاله معرفة نسبة التغيير على أي مبلغ مدخل.</p>
+      <div class="container">
+            <div class="column">
+                  <label for="basicAmount">المبلغ الأساسي:</label>
+                  <input type="number" id="basicAmount" oninput="calculateGrowth()"
+                        onkeypress="handleEnter(event, calculateGrowth)">
+                  <label for="increaseAmount">التغيير</label>
+                  <input type="number" id="increaseAmount" oninput="calculateGrowth()"
+                        onkeypress="handleEnter(event, calculateGrowth)">
+                  <label for="growthRate">الفرق والنسبة المئوية</label>
+                  <textarea id="growthRate" disabled></textarea>
+                  <button onclick="clearGrowth()">مسح</button>
+            </div>
+            <div class="column">
+                  <label for="number">أدخل الرقم:</label>
+                  <input type="number" id="number" oninput="calculatePercentage()"
+                        onkeypress="handleEnter(event, calculatePercentage)">
+                  <label for="percentage">أدخل النسبة المئوية (%):</label>
+                  <input type="number" id="percentage" oninput="calculatePercentage()"
+                        onkeypress="handleEnter(event, calculatePercentage)">
+                  <label for="result">النتيجة:</label>
+                  <textarea id="result" disabled></textarea>
+                  <button onclick="clearPercentage()">مسح</button>
+            </div>
+      </div>
+      <footer>
+            All rights reserved © 2024<br> By <a href="https://x.com/yhj34" target="_blank">Yasser</a>
+      </footer>
+
+      <div id="visitorCounter">NV: <span id="visitCount">0</span></div>
+
+      <script>
+            let visitCount = 0;
+            let isVisited = false;
+
+            function updateVisitorCounter()
+            {
+                  if (!isVisited)
+                  {
+                        visitCount++;
+                        document.getElementById("visitCount").innerText = visitCount;
+                        isVisited = true; // بعد أول تفاعل، يتم إلغاء تفعيل الأحداث
+                  }
+            }
+
+            function calculateGrowth()
+            {
+                  updateVisitorCounter();
+                  const basicAmount = parseFloat(document.getElementById("basicAmount").value);
+                  const increaseAmount = parseFloat(document.getElementById("increaseAmount").value);
+
+                  if (!isNaN(basicAmount) && !isNaN(increaseAmount))
+                  {
+                        const difference = increaseAmount - basicAmount;
+                        const growthPercentage = (difference / basicAmount) * 100;
+
+                        const growthRateField = document.getElementById("growthRate");
+
+                        if (growthPercentage < 0)
+                        {
+                              growthRateField.style.color = "red";
+                        } else
+                        {
+                              growthRateField.style.color = "green";
+                        }
+
+                        growthRateField.value = `النسبة ${growthPercentage.toFixed(2)}%\nالفرق: ${difference.toFixed(2)}`;
+                  }
+            }
+
+            function calculatePercentage()
+            {
+                  updateVisitorCounter();
+                  const number = parseFloat(document.getElementById("number").value);
+                  const percentage = parseFloat(document.getElementById("percentage").value);
+
+                  if (!isNaN(number) && !isNaN(percentage))
+                  {
+                        const increase = (number * percentage) / 100;
+                        const result = number + increase;
+
+                        const resultField = document.getElementById("result");
+                        resultField.value = `النتيجة: ${result.toFixed(2)}\nالتغيير : ${increase.toFixed(2)}`;
+                  }
+            }
+
+            function clearGrowth()
+            {
+                  document.getElementById("basicAmount").value = '';
+                  document.getElementById("increaseAmount").value = '';
+                  document.getElementById("growthRate").value = '';
+            }
+
+            function clearPercentage()
+            {
+                  document.getElementById("number").value = '';
+                  document.getElementById("percentage").value = '';
+                  document.getElementById("result").value = '';
+            }
+
+            // إضافة الكود لمعالجة الضغط على مفتاح Enter
+            function handleEnter(event, callback)
+            {
+                  if (event.key === 'Enter')
+                  {
+                        event.preventDefault(); // إيقاف السلوك الافتراضي
+                        callback(); // استدعاء الدالة الحسابية
+                        const formElements = Array.from(document.querySelectorAll('input, textarea, button'));
+                        const currentIndex = formElements.indexOf(event.target);
+                        if (currentIndex >= 0 && currentIndex < formElements.length - 1)
+                        {
+                              formElements[currentIndex + 1].focus(); // نقل التركيز إلى العنصر التالي
+                        }
+                  }
+
+            }
+
+            // حدث لتحديث العداد عند أول تفاعل مع الصفحة
+            document.addEventListener('mousemove', updateVisitorCounter, {
+                  once: true
+            });
+            document.addEventListener('mouseover', updateVisitorCounter, {
+                  once: true
+            });
+            document.addEventListener('input', updateVisitorCounter, {
+                  once: true
+            });
+      </script>
+</body>
+
+</html>
